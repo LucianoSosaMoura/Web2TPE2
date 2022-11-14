@@ -1,6 +1,7 @@
 <?php
 
 require_once "Model/FeaturedModel.php";
+require_once "Model/CiudadModel.php";
 require_once "View/ApiView.php";
 
 
@@ -12,6 +13,7 @@ class ApiController {
 
     public function __construct() {
         $this->model = new FeaturedModel();
+        $this->ciudadModel = new CiudadModel();
         $this->view = new ApiView();
 
         // lee el body del request
@@ -107,22 +109,31 @@ class ApiController {
     }
     public function insertarDestacada() {
         // obtengo el body del request (json)
-        $destacada= $this->getData();
-        $ciudad = $destacada->ciudad;
+        $destacada = $this->getData();
+        $ciudadDestacada = $destacada->ciudad;
+        $ciudades = $this->ciudadModel->getIdCiudades();
+        $coincide = false;
+
 
         if (empty ($destacada->operacion) || empty ($destacada->descripcion) || empty($destacada->precio) || empty($destacada->ciudad)) {
         $this->view->response("Complete los datos", 400);
         } else {
-            if ( //hacer un for recorriendo ciudades y ver si hay, entra
-                $ciudad===4 || $ciudad===7 || $ciudad===10){
-                $id=$this->model->insertDestacada($destacada->operacion, $destacada->descripcion, $destacada->precio, $destacada->ciudad);
-                $destacada = $this->model->getDestacada($id);
-                $this->view->response("La propiedad destacada con el id $id fue creada.", 201);
-            } else{
+            foreach ($ciudades as $ciudad) {
+                if ($ciudad->idCiudad === $ciudadDestacada){
+                    $coincide = true;
+                    $id = $this->model->insertDestacada($destacada->operacion, $destacada->descripcion, $destacada->precio, $destacada->ciudad);
+                    $destacada = $this->model->getDestacada($id);
+                    $this->view->response("La propiedad destacada con el id $id fue creada.", 201);
+                } 
+            }  
+            if (!$coincide){
                 $this->view->response("La ciudad indicada no fue encontrada", 404);
-              }
-        }
+            }      
+          }
+
     }
+    
+    
 
     public function actualizarDestacada($params = []) {
         $id = $params[':ID'];
