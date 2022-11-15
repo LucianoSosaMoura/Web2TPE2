@@ -1,4 +1,4 @@
-Explicación de funcionalidad:
+Endpoints:
 
 GET
 /destacadas -> trae todas las propiedades;

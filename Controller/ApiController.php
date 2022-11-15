@@ -4,12 +4,10 @@ require_once "Model/FeaturedModel.php";
 require_once "Model/CiudadModel.php";
 require_once "View/ApiView.php";
 
-
 class ApiController {
 
     private $model;
     private $view;
-
 
     public function __construct() {
         $this->model = new FeaturedModel();
@@ -24,7 +22,6 @@ class ApiController {
     private function getData() {
         return json_decode($this->data);
     }
-
 
     public function obtenerDestacadas() {
         if (isset($_GET['sort'])){
@@ -93,9 +90,8 @@ class ApiController {
                 $this->view->response($destacada, 200);
             else 
                 $this->view->response("La propiedad destacada con el id $id no existe", 404);
-        }
+    }
         
-    
     public function eliminarDestacada($params = null) {
         $id = $params[":ID"];  
         $destacada = $this->model->getDestacada($id);
@@ -107,6 +103,7 @@ class ApiController {
                 $this->view->response("La propiedad destacada con el id $id no existe.",404);    
         }
     }
+
     public function insertarDestacada() {
         // obtengo el body del request (json)
         $destacada = $this->getData();
@@ -119,7 +116,7 @@ class ApiController {
         $this->view->response("Complete los datos", 400);
         } else {
             foreach ($ciudades as $ciudad) {
-                if ($ciudad->idCiudad === $ciudadDestacada){
+                 if ($ciudad->idCiudad === $ciudadDestacada){
                     $coincide = true;
                     $id = $this->model->insertDestacada($destacada->operacion, $destacada->descripcion, $destacada->precio, $destacada->ciudad);
                     $destacada = $this->model->getDestacada($id);
@@ -130,33 +127,37 @@ class ApiController {
                 $this->view->response("La ciudad indicada no fue encontrada", 404);
             }      
           }
-
     }
-    
-    
-
+        
     public function actualizarDestacada($params = []) {
         $id = $params[':ID'];
         $destacada = $this->model->getDestacada($id);
-
-        if ($destacada) {
+        if ($destacada){
             $body = $this->getData();
-            $operacion = $body->operacion;
-            $descripcion = $body->descripcion;
-            $precio = $body->precio;
-            $ciudad = $body->ciudad;
-            if ($ciudad===4 || $ciudad===7 || $ciudad===10){
-            $destacada = $this->model->updateDestacada($operacion, $descripcion, $precio, $ciudad, $id);
-            $this->view->response("La propiedad destacada con el id $id fue actualizada con éxito", 200);
-            } else{
-            $this->view->response("La ciudad indicada no fue encontrada", 404);
-            }
+            $ciudadDestacada = $body->ciudad;
+            $ciudades = $this->ciudadModel->getIdCiudades();
+            $coincide = false;
+                    
+            if (empty ($body->operacion) || empty ($body->descripcion) || empty($body->precio) || empty($body->ciudad)) {
+                $this->view->response("Complete los datos", 400);
+            } else {
+                    foreach ($ciudades as $ciudad) {
+                        if ($ciudad->idCiudad === $ciudadDestacada){
+                            $coincide = true;
+                            $this->model->updateDestacada($body->operacion, $body->descripcion, $body->precio, $body->ciudad, $id);
+                            $this->view->response("La propiedad destacada con el id $id fue actualizada con éxito.", 200);
+                        } 
+                    }  
+                    if (!$coincide){
+                        $this->view->response("La ciudad indicada no fue encontrada", 404);
+                    }      
+              }
         }
         else 
             $this->view->response("La propiedad destacada con el id $id no fue encontrada", 404);
     }
 
-
-  
 }
+  
+
 
