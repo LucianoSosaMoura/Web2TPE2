@@ -3,16 +3,19 @@
 require_once "Model/FeaturedModel.php";
 require_once "Model/CiudadModel.php";
 require_once "View/ApiView.php";
+require_once "Helpers/AuthApiHelper.php";
 
 class ApiController {
 
     private $model;
     private $view;
+    private $authHelper;
 
     public function __construct() {
         $this->model = new FeaturedModel();
         $this->ciudadModel = new CiudadModel();
         $this->view = new ApiView();
+        $this->authHelper = new AuthApiHelper();
 
         // lee el body del request
         $this->data = file_get_contents("php://input");
@@ -94,6 +97,12 @@ class ApiController {
         
     public function eliminarDestacada($params = null) {
         $id = $params[":ID"];  
+
+        if(!$this->authHelper->isLoggedIn()){
+            $this->view->response("No estas logueado", 401);
+            return;
+        }
+
         $destacada = $this->model->getDestacada($id);
 
         if(!empty($destacada)) {
@@ -105,6 +114,12 @@ class ApiController {
     }
 
     public function insertarDestacada() {
+        
+        if(!$this->authHelper->isLoggedIn()){
+            $this->view->response("No estas logueado", 401);
+            return;
+        }
+
         // obtengo el body del request (json)
         $destacada = $this->getData();
         $ciudadDestacada = $destacada->ciudad;
@@ -131,6 +146,12 @@ class ApiController {
         
     public function actualizarDestacada($params = []) {
         $id = $params[':ID'];
+
+        if(!$this->authHelper->isLoggedIn()){
+            $this->view->response("No estas logueado", 401);
+            return;
+        }
+
         $destacada = $this->model->getDestacada($id);
         if ($destacada){
             $body = $this->getData();
