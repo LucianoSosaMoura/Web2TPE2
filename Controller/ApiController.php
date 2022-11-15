@@ -35,7 +35,7 @@ class ApiController {
                 $order="asc";
             }
             $sort=$_GET['sort'];
-            if ($sort==='idDestacada' || $sort==='operacion' || $sort==='descripcion' || $sort==='precio' || $sort==='nombreCiudad'){
+            if ($sort==='idDestacada' || $sort==='operacion' || $sort==='descripcion' || $sort==='precio' || $sort==='ciudad' || $sort==='nombreCiudad'){
                 if (isset($_GET['operacion'])){
                     $operacion=$_GET['operacion'];
                     if ($operacion==='venta' || $operacion==='alquiler'){
